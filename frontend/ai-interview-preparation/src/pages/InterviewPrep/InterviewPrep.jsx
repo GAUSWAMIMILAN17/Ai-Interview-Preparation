@@ -13,11 +13,15 @@ import QuestionCard from "../../components/Cards/QuestionCard";
 import SkeletonLoader from "../../components/Loader/SkeletonLoader";
 import AIResponsePreview from "./components/AiResponsePreview";
 import Drawer from "../../components/Drawer";
+import { useDispatch, useSelector } from "react-redux";
+import store from "../../redux/store";
+import { setSessionData } from "../../redux/sessionsSlice";
 
 const InterviewPrep = () => {
   const { sessionId } = useParams();
-
-  const [sessionData, setSessionData] = useState(null);
+  const dispatch = useDispatch();
+  const{sessionData} = useSelector((store) => store.sessions)
+  // const [sessionData, setSessionData] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
 
   const [openLearnMoreDrawer, setOpenLearnMoreDrawer] = useState(false);
@@ -35,9 +39,9 @@ const InterviewPrep = () => {
           withCredentials: true,
         },
       );
-
+      // console.log(res.data)
       if (res.data.success) {
-        setSessionData(res.data.session);
+        dispatch(setSessionData(res.data.session))
       }
       // console.log(res.data.session)
     } catch (error) {

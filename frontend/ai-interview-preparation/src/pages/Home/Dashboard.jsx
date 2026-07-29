@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import DashboardLayout from "../../components/Layout/DashboardLayout.jsx";
 import { LuPlus } from "react-icons/lu"; // ✅ Correct
 import { useNavigate } from "react-router-dom";
@@ -12,13 +12,14 @@ import CreateSessionForm from "./CreateSessionForm.jsx";
 import Modal from "../../components/Modal.jsx";
 import DeleteAlertContent from "../../components/DeleteAlertContent.jsx";
 import toast from "react-hot-toast";
+import { setSessions } from "../../redux/sessionsSlice.js";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const [openCreateModal, setOpenCreateModal] = useState(false);
-  const [sessions, setSessions] = useState([]);
-
+  // const [sessions, setSessions] = useState([]);
+  const{sessions} = useSelector((store) =>store.sessions)
   const [openDeleteAlert, setOpenDeleteAlert] = useState({
     open: false,
     data: null,
@@ -30,7 +31,8 @@ const Dashboard = () => {
         withCredentials: true,
       });
       if (res.data) {
-        setSessions(res.data);
+        // setSessions(res.data);
+        dispatch(setSessions(res.data))
       }
     } catch (error) {
       console.log("Session Fetching Error", error);
@@ -57,7 +59,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchAllSessions();
-  }, []);
+  });
 
   return (
     <DashboardLayout>
