@@ -1,6 +1,7 @@
 import { User } from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import uploadToCloudinary from "../utils/uploadToCloudinary.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -142,6 +143,7 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
+
 // export const uploadImage = async (req, res) => {
 //   try {
 //     if (!req.file) {
@@ -150,24 +152,14 @@ export const getUserProfile = async (req, res) => {
 //         message: "No file uploaded",
 //       });
 //     }
-//     const user = await User.findById(req.user.id).select("-password");
 
-//     if(!user) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "User not found"
-//       })
-//     }
+//     const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
 
-//     const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${
-//       req.file.filename
-//     }`;
+//     return res.status(200).json({
+//       success: true,
+//       imageUrl,
+//     });
 
-//     user.profileImageUrl = imageUrl;
-//     await user.save();
-
-//     // console.log(user)
-//     res.status(200).json({ imageUrl });
 //   } catch (error) {
 //     console.error(error);
 
@@ -177,32 +169,6 @@ export const getUserProfile = async (req, res) => {
 //     });
 //   }
 // };
-
-export const uploadImage = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "No file uploaded",
-      });
-    }
-
-    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-
-    return res.status(200).json({
-      success: true,
-      imageUrl,
-    });
-
-  } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
-};
 
 export const logOut = async (req, res) => {
   try {
@@ -221,3 +187,67 @@ export const logOut = async (req, res) => {
     console.error("Server Error", error)
   }
 }
+
+export const uploadImage = async (req, res) => {
+  try {
+    // console.log("REQ FILE:", req.file);
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    const result = await uploadToCloudinary(req.file.buffer);
+
+    return res.status(200).json({
+      success: true,
+      imageUrl: result.secure_url,
+      publicId: result.public_id,
+    });
+
+  } catch (error) {
+  console.log("=========== ERROR ===========");
+  console.dir(error, { depth: null });
+
+  return res.status(500).json({
+    success: false,
+    message: error.message,
+  });
+}
+};
+
+export const updateImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    const result = await uploadToCloudinary(req.file.buffer);
+
+    // Get logged-in user
+    const user = await User.findById(req.user.id); // or req.id depending on your auth middleware
+
+    user.profileImageUrl = result.secure_url;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      imageUrl: result.secure_url,
+      publicId: result.public_id,
+      user,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

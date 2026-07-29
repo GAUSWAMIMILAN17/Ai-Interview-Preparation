@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 dotenv.config();
-
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -12,9 +11,11 @@ import sessionRoutes from "./routes/sessionRoutes.js";
 import questionRoutes from "./routes/questionsRoutes.js"
 import protect from './middlewares/authMiddleware.js';
 import { generateInterviewQuestions,generateConceptExplaination } from './controllers/aiController.js';
+import cloudinary from "./config/cloudinary.js";
 
 
 const app = express();
+
 
 //middleware to handle CORS
 app.use(
