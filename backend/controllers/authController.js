@@ -98,7 +98,7 @@ export const loginUser = async (req, res) => {
       .cookie("token", token, {
         httpOnly: true, // JS thi access nai thai
         secure: true,
-        sameSite: "lax",
+        sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000, // 1 day
       })
       .json({
