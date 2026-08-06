@@ -4,14 +4,15 @@ import Input from "../../components/Inputs/Input.jsx";
 import { validateEmail } from "../../utils/helper.js";
 import axios from "axios";
 import { API_PATHS, BASE_URL } from "../../utils/apiPaths.js";
-import { useDispatch } from "react-redux";
-import { setUser } from "../../redux/authSlice.js";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoading, setUser } from "../../redux/authSlice.js";
 
 const Login = ({ setCurrentPage, setOpenAuthModel }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
 
+  const {loading} = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -31,22 +32,24 @@ const Login = ({ setCurrentPage, setOpenAuthModel }) => {
 
   setError("");
 
-  // Login API Call
+  dispatch(setLoading(true));
+
   try {
-    // console.log(email, password)
+    const res = await axios.post(
+      `${BASE_URL}${API_PATHS.AUTH.LOGIN}`,
+      {
+        email,
+        password,
+      },
+      {
+        withCredentials: true,
+      }
+    );
 
-    const res = await axios.post(`${BASE_URL}${API_PATHS.AUTH.LOGIN}`, {
-      email,
-      password
-    }, {
-      withCredentials: true
-    })
-
-    // console.log(res.data)
-    if(res.data.success) {
-      dispatch(setUser(res.data.userData))
+    if (res.data.success) {
+      dispatch(setUser(res.data.userData));
       setOpenAuthModel(false);
-      navigate("/")
+      navigate("/");
     }
   } catch (error) {
     if (error.response && error.response.data.message) {
@@ -54,6 +57,8 @@ const Login = ({ setCurrentPage, setOpenAuthModel }) => {
     } else {
       setError("Something went wrong. Please try again.");
     }
+  } finally {
+    dispatch(setLoading(false));
   }
 };
 
@@ -92,9 +97,17 @@ const Login = ({ setCurrentPage, setOpenAuthModel }) => {
 
 <button
   type="submit"
-  className="btn-primary"
+  disabled={loading}
+  className="btn-primary flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
 >
-  LOGIN
+  {loading ? (
+    <>
+      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      Logging in...
+    </>
+  ) : (
+    "LOGIN"
+  )}
 </button>
 
 <p className="text-[13px] text-slate-800 mt-3">

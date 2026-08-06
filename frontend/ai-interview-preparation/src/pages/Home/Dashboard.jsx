@@ -18,8 +18,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   // const [sessions, setSessions] = useState([]);
-  const{sessions} = useSelector((store) =>store.sessions)
+  const { sessions } = useSelector((store) => store.sessions);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({
     open: false,
     data: null,
@@ -32,7 +33,7 @@ const Dashboard = () => {
       });
       if (res.data) {
         // setSessions(res.data);
-        dispatch(setSessions(res.data))
+        dispatch(setSessions(res.data));
       }
     } catch (error) {
       console.log("Session Fetching Error", error);
@@ -40,26 +41,34 @@ const Dashboard = () => {
   };
 
   const deleteSession = async (sessionData) => {
-    try {
-      await axios.delete(`${BASE_URL}${API_PATHS.SESSION.DELETE(sessionData?._id)}`, {
-        withCredentials: true
-      })
-      toast.success("Session Deleted Successfully");
+  try {
+    setIsDeleting(true);
 
-      setOpenDeleteAlert({
-        open: false,
-        data: null
-      })
-      fetchAllSessions();
+    await axios.delete(
+      `${BASE_URL}${API_PATHS.SESSION.DELETE(sessionData?._id)}`,
+      {
+        withCredentials: true,
+      }
+    );
 
-    } catch (error) {
-      console.log("Delete Error", error)
-    }
-  };
+    toast.success("Session Deleted Successfully");
+
+    setOpenDeleteAlert({
+      open: false,
+      data: null,
+    });
+
+    fetchAllSessions();
+  } catch (error) {
+    console.log("Delete Error", error);
+  } finally {
+    setIsDeleting(false);
+  }
+};
 
   useEffect(() => {
     fetchAllSessions();
-  });
+  }, []);
 
   return (
     <DashboardLayout>
@@ -143,6 +152,7 @@ const Dashboard = () => {
           <DeleteAlertContent
             content="Are you sure you want to delete this session detail?"
             onDelete={() => deleteSession(openDeleteAlert.data)}
+            loading={isDeleting}
           />
         </div>
       </Modal>

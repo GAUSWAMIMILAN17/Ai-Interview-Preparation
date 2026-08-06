@@ -12,60 +12,67 @@ const SignUp = ({ setCurrentPage }) => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  // Handle SignUp Form Submit
   const handleSignUp = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  let profileImageUrl = "";
+    let profileImageUrl = "";
 
-  if (!fullName) {
-    setError("Please enter full name.");
-    return;
-  }
-
-  if (!validateEmail(email)) {
-    setError("Please enter a valid email address.");
-    return;
-  }
-
-  if (!password) {
-    setError("Please enter the password");
-    return;
-  }
-
-  setError("");
-
-  // SignUp API Call
-  try {
-    if(profilePic) {
-      const imgUploadRes = await uploadingImage(profilePic);
-      profileImageUrl = imgUploadRes.imageUrl || "";
+    if (!fullName.trim()) {
+      setError("Please enter your full name.");
+      return;
     }
 
-    const res = await axios.post(`${BASE_URL}${API_PATHS.AUTH.REGISTER}`,{
-      name: fullName,
-      email,
-      password,
-      profileImageUrl
-    }, {
-      withCredentials: true
-    })
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
 
-    if(res.data.success){
-      setCurrentPage("login")
+    if (!password) {
+      setError("Please enter the password.");
+      return;
     }
-  } catch (error) {
-    if (error.response && error.response.data.message) {
-      setError(error.response.data.message);
-    } else {
-      setError("Something went wrong. Please try again.");
+
+    setError("");
+
+    try {
+      setLoading(true);
+
+      if (profilePic) {
+        const imgUploadRes = await uploadingImage(profilePic);
+        profileImageUrl = imgUploadRes.imageUrl || "";
+      }
+
+      const res = await axios.post(
+        `${BASE_URL}${API_PATHS.AUTH.REGISTER}`,
+        {
+          name: fullName,
+          email,
+          password,
+          profileImageUrl,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.success) {
+        setCurrentPage("login");
+      }
+    } catch (error) {
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
-  }
-};
+  };
 
   return (
     <div className="w-[90vw] md:w-[33vw] p-7 flex flex-col justify-center">
@@ -73,19 +80,22 @@ const SignUp = ({ setCurrentPage }) => {
         Create an Account
       </h3>
 
-      <p className="text-xs text-slate-700 mt-[5px] mb-6">
+      <p className="text-xs text-slate-700 mt-1 mb-6">
         Join us today by entering your details below.
       </p>
 
       <form onSubmit={handleSignUp}>
+        <ProfilePhotoSelector
+          image={profilePic}
+          setImage={setProfilePic}
+        />
 
-        <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 gap-2">
           <Input
             value={fullName}
             onChange={({ target }) => setFullName(target.value)}
             label="Full Name"
-            placeholder="John"
+            placeholder="John Doe"
             type="text"
           />
 
@@ -94,39 +104,46 @@ const SignUp = ({ setCurrentPage }) => {
             onChange={({ target }) => setEmail(target.value)}
             label="Email Address"
             placeholder="john@example.com"
-            type="text"
+            type="email"
           />
 
           <Input
             value={password}
             onChange={({ target }) => setPassword(target.value)}
             label="Password"
-            placeholder="Min 8 Characters"
+            placeholder="Minimum 8 characters"
             type="password"
           />
         </div>
 
         {error && (
-          <p className="text-red-500 text-xs pb-2.5">
+          <p className="text-red-500 text-xs mt-2">
             {error}
           </p>
         )}
 
         <button
           type="submit"
-          className="btn-primary"
+          disabled={loading}
+          className="btn-primary mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          SIGN UP
+          {loading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Creating Account...
+            </>
+          ) : (
+            "SIGN UP"
+          )}
         </button>
 
-        <p className="text-[13px] text-slate-800 mt-3">
-          Already an account?{" "}
+        <p className="text-[13px] text-slate-800 mt-4 text-center">
+          Already have an account?{" "}
           <button
             type="button"
             className="font-medium text-primary underline cursor-pointer"
-            onClick={() => {
-              setCurrentPage("login");
-            }}
+            onClick={() => setCurrentPage("login")}
+            disabled={loading}
           >
             Login
           </button>

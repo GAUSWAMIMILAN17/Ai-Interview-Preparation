@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment";
 import { AnimatePresence, motion } from "framer-motion";
-import { LuCircleAlert, LuListCollapse } from "react-icons/lu";
+import { LuArrowLeft, LuCircleAlert, LuListCollapse } from "react-icons/lu";
 import SpinnerLoader from "../../components/Loader/SpinnerLoader";
 import { toast } from "react-hot-toast";
 import DashboardLayout from "../../components/Layout/DashboardLayout";
@@ -23,6 +23,7 @@ const InterviewPrep = () => {
   const{sessionData} = useSelector((store) => store.sessions)
   // const [sessionData, setSessionData] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
 
   const [openLearnMoreDrawer, setOpenLearnMoreDrawer] = useState(false);
   const [explanation, setExplanation] = useState(null);
@@ -154,6 +155,15 @@ const InterviewPrep = () => {
 
   return (
     <DashboardLayout>
+      <div className="container mx-auto px-4 md:px-0 pt-4">
+    <button
+      onClick={() => navigate("/dashboard")}
+      className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black transition cursor-pointer mb-5"
+    >
+      <LuArrowLeft size={20} />
+      Back to Dashboard
+    </button>
+  </div>
       <RoleInfoHeader
         role={sessionData?.role || ""}
         topicsToFocus={sessionData?.topicsToFocus || ""}

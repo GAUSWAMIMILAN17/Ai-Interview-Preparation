@@ -93,13 +93,15 @@ export const deleteSession = async (req, res) => {
 
     if (!session) {
       return res.status(404).json({
+        success: false,
         message: "Session not found",
       });
     }
 
-    // Check if the logged-in user owns this session
+    // Check ownership
     if (session.user.toString() !== req.user.id) {
       return res.status(401).json({
+        success: false,
         message: "Not authorized to delete this session",
       });
     }
@@ -112,11 +114,16 @@ export const deleteSession = async (req, res) => {
     // Delete the session
     await session.deleteOne();
 
-    res.status(200).json({
+    return res.status(200).json({
+      success: true,
       message: "Session deleted successfully",
     });
   } catch (error) {
-    console.error("Server Error", error);
-    process.exit(1);
+    console.error("Server Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };

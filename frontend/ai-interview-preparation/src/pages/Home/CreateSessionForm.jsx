@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Input from "../../components/Inputs/Input.jsx"
-import SpinnerLoader from "../../components/Loader/SpinnerLoader.jsx";
-import { setLoading } from "../../redux/authSlice.js";
-import { useSelector, useDispatch } from "react-redux";
-import { API_PATHS, BASE_URL } from "../../utils/apiPaths.js";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+
+import Input from "../../components/Inputs/Input.jsx";
+import SpinnerLoader from "../../components/Loader/SpinnerLoader.jsx";
+
+import { API_PATHS, BASE_URL } from "../../utils/apiPaths.js";
+import { setLoading } from "../../redux/authSlice.js";
 
 const CreateSessionForm = () => {
   const [formData, setFormData] = useState({
@@ -15,16 +17,16 @@ const CreateSessionForm = () => {
     description: "",
   });
 
-  // const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const{loading} = useSelector((store) => store.auth);
+
+  const { loading } = useSelector((store) => store.auth);
 
   const handleChange = (key, value) => {
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData((prev) => ({
+      ...prev,
       [key]: value,
     }));
   };
@@ -40,102 +42,125 @@ const CreateSessionForm = () => {
     }
 
     setError("");
-    dispatch(setLoading(true))
+
+    dispatch(setLoading(true));
+
     try {
-      const aiResponse = await axios.post(`${BASE_URL}${API_PATHS.AI.GENERATE_QUESTIONS}`, {
-        role,
-        experience,
-        topicsToFocus,
-        numberOfQuestions : 10
-      }, {
-        withCredentials: true
-      })
+      // Generate AI Questions
+      const aiResponse = await axios.post(
+        `${BASE_URL}${API_PATHS.AI.GENERATE_QUESTIONS}`,
+        {
+          role,
+          experience,
+          topicsToFocus,
+          numberOfQuestions: 10,
+        },
+        {
+          withCredentials: true,
+        }
+      );
 
       const generatedQuestions = aiResponse.data;
 
-      const res = await axios.post(`${BASE_URL}${API_PATHS.SESSION.CREATE}`,
+      // Create Interview Session
+      const res = await axios.post(
+        `${BASE_URL}${API_PATHS.SESSION.CREATE}`,
         {
           ...formData,
-          questions : generatedQuestions
-        }, 
+          questions: generatedQuestions,
+        },
         {
-          withCredentials: true
+          withCredentials: true,
         }
-      )
+      );
 
-      if(res.data?.session?._id){
-        navigate(`/interview-prep/${res.data?.session._id}`)
+      if (res.data?.session?._id) {
+        navigate(`/interview-prep/${res.data.session._id}`);
       }
-    } catch(error) {
-      console.log("Session Creation Error", error)
-    } finally {
-      dispatch(setLoading(false))
-    }
+    } catch (error) {
+      console.log("Session Creation Error:", error);
 
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Failed to create interview session.");
+      }
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   return (
-  <div className="w-[90vw] md:w-[35vw] p-7 flex flex-col justify-center">
-    <h3 className="text-lg font-semibold text-block">
-      Start a New Interview Journey
-    </h3>
+    <div className="w-[90vw] md:w-[35vw] p-7 flex flex-col justify-center">
+      <h3 className="text-lg font-semibold text-black">
+        Start a New Interview Journey
+      </h3>
 
-    <p className="text-x5 text-slate-700 mt-[5px] mb-3">
-      Fill out a few quick details and unlock your personalized set of
-      interview questions!
-    </p>
+      <p className="text-sm text-slate-700 mt-1 mb-5">
+        Fill out a few quick details and unlock your personalized interview
+        questions.
+      </p>
 
-    <form onSubmit={handleCreateSession} className="flex flex-col">
-      <Input
-        value={formData.role}
-        onChange={({ target }) => handleChange("role", target.value)}
-        label="Target Role"
-        placeholder="(e.g., Frontend Developer, UI/UX Designer, etc.)"
-        type="text"
-      />
+      <form onSubmit={handleCreateSession} className="flex flex-col">
+        <Input
+          value={formData.role}
+          onChange={({ target }) => handleChange("role", target.value)}
+          label="Target Role"
+          placeholder="Frontend Developer"
+          type="text"
+        />
 
-      <Input
-        value={formData.experience}
-        onChange={({ target }) => handleChange("experience", target.value)}
-        label="Years of Experience"
-        placeholder="(e.g., 1 year, 3 years, 5+ years)"
-        type="number"
-      />
+        <Input
+          value={formData.experience}
+          onChange={({ target }) => handleChange("experience", target.value)}
+          label="Years of Experience"
+          placeholder="2"
+          type="number"
+        />
 
-      <Input
-        value={formData.topicsToFocus}
-        onChange={({ target }) =>
-          handleChange("topicsToFocus", target.value)
-        }
-        label="Topics to Focus On"
-        placeholder="(Comma-separated, e.g., React, Node.js, MongoDB)"
-        type="text"
-      />
+        <Input
+          value={formData.topicsToFocus}
+          onChange={({ target }) =>
+            handleChange("topicsToFocus", target.value)
+          }
+          label="Topics to Focus On"
+          placeholder="React, Node.js, MongoDB"
+          type="text"
+        />
 
-      <Input
-        value={formData.description}
-        onChange={({ target }) =>
-          handleChange("description", target.value)
-        }
-        label="Description"
-        placeholder="(Any specific goals or notes for this session)"
-        type="text"
-      />
+        <Input
+          value={formData.description}
+          onChange={({ target }) =>
+            handleChange("description", target.value)
+          }
+          label="Description"
+          placeholder="Any additional notes..."
+          type="text"
+        />
 
-      {error && <p className="text-red-500 text-x5 pb-2.5">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mt-2">
+            {error}
+          </p>
+        )}
 
-      <button
-        type="submit"
-        className="btn-primary w-full mt-2"
-        // disabled={}
-      > {
-        loading && <SpinnerLoader />
-      }
-        Create Session
-      </button>
-    </form>
-  </div>
-);
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-primary w-full mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <>
+              <SpinnerLoader />
+              Creating Session...
+            </>
+          ) : (
+            "Create Session"
+          )}
+        </button>
+      </form>
+    </div>
+  );
 };
 
 export default CreateSessionForm;

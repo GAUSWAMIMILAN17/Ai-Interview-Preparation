@@ -10,6 +10,7 @@ import { APP_FEATURES } from "../utils/data.js";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import ProfileInfoCard from "../components/Cards/ProfileInfoCard.jsx";
+import Footer from "../components/Layout/Footer.jsx";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -146,9 +147,7 @@ const LandingPage = () => {
             </div>
 
             {/* Footer */}
-            <div className="text-sm bg-gray-50 text-secondary text-center p-5 mt-5">
-              Founder - Milan Gauswami
-            </div>
+            <Footer />
           </section>
         </div>
       </div>

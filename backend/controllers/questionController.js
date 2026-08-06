@@ -1,5 +1,5 @@
-import {Question} from "../models/Question.js";
-import {Session} from "../models/Session.js";
+import { Question } from "../models/Question.js";
+import { Session } from "../models/Session.js";
 
 // @desc    Add additional questions to an existing session
 // @route   POST /api/questions/add
@@ -28,7 +28,7 @@ export const addQuestionsToSession = async (req, res) => {
         session: sessionId,
         question: q.question,
         answer: q.answer,
-      }))
+      })),
     );
 
     // Update session to include new question IDs
