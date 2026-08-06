@@ -45,7 +45,7 @@ const Footer = () => {
           {/* Social */}
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com/"
+              href="https://github.com/GAUSWAMIMILAN17"
               target="_blank"
               rel="noreferrer"
               className="w-10 h-10 rounded-full border border-amber-300 flex items-center justify-center hover:bg-black hover:text-white transition"
@@ -54,7 +54,7 @@ const Footer = () => {
             </a>
 
             <a
-              href="https://linkedin.com/"
+              href="https://www.linkedin.com/in/milangauswami17"
               target="_blank"
               rel="noreferrer"
               className="w-10 h-10 rounded-full border border-amber-300 flex items-center justify-center hover:bg-black hover:text-white transition"
@@ -63,7 +63,7 @@ const Footer = () => {
             </a>
 
             <a
-              href="mailto:example@gmail.com"
+              href="gauswamimilan17@gmail.com"
               className="w-10 h-10 rounded-full border border-amber-300 flex items-center justify-center hover:bg-black hover:text-white transition"
             >
               <LuMail size={18} />
