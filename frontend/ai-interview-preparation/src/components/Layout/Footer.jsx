@@ -62,12 +62,7 @@ const Footer = () => {
               <LuLinkedin size={18} />
             </a>
 
-            <a
-              href="gauswamimilan17@gmail.com"
-              className="w-10 h-10 rounded-full border border-amber-300 flex items-center justify-center hover:bg-black hover:text-white transition"
-            >
-              <LuMail size={18} />
-            </a>
+        
           </div>
         </div>
 
